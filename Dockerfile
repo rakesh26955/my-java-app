@@ -1,9 +1,7 @@
-# Dockerfile v2 using Alpine
+# Use the official OpenJDK 11 Alpine image as the base
+FROM openjdk:11-alpine
 
-# Use the official OpenJDK 11 image based on Alpine as a parent image
-FROM openjdk:11-jdk-alpine
-
-# Install Maven in Alpine
+# Install Maven
 RUN apk update && \
     apk add maven
 
