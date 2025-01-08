@@ -35,27 +35,27 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # Step 3: Debug to verify secrets
-      - name: Debug - Verify Secrets
+      # Step 3: Set environment variables for Azure Container Registry
+      - name: Set environment variables for ACR login
         run: |
-          echo "ACR_LOGIN_SERVER: ${{ secrets.AZURE_ACR_LOGIN_SERVER }}"
-          echo "ACR_USERNAME: ${{ secrets.azure_username }}"
-          echo "ACR_PASSWORD: ${{ secrets.azure_password }}"
+          echo "AZURE_ACR_LOGIN_SERVER=${{ secrets.AZURE_ACR_LOGIN_SERVER }}" >> $GITHUB_ENV
+          echo "AZURE_USERNAME=${{ secrets.azure_username }}" >> $GITHUB_ENV
+          echo "AZURE_PASSWORD=${{ secrets.azure_password }}" >> $GITHUB_ENV
 
-      # Step 4: Log in to Azure Container Registry using secrets
+      # Step 4: Log in to Azure Container Registry using the environment variables
       - name: Log in to Azure Container Registry
         uses: azure/docker-login@v1
         with:
-          login-server: ${{ secrets.AZURE_ACR_LOGIN_SERVER }}  # ACR login server from secret
-          username: ${{ secrets.azure_username }}  # ACR username from secret
-          password: ${{ secrets.azure_password }}  # ACR password from secret
+          login-server: ${{ env.AZURE_ACR_LOGIN_SERVER }}  # ACR login server from env variable
+          username: ${{ env.AZURE_USERNAME }}  # ACR username from env variable
+          password: ${{ env.AZURE_PASSWORD }}  # ACR password from env variable
 
       # Step 5: Build the Docker image
       - name: Build the Docker image
         run: |
-          docker build -t ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/my-java-app:${{ github.event.inputs.tag }} .
+          docker build -t ${{ env.AZURE_ACR_LOGIN_SERVER }}/my-java-app:${{ github.event.inputs.tag }} .
 
       # Step 6: Push the Docker image to Azure Container Registry
       - name: Push the Docker image
         run: |
-          docker push ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/my-java-app:${{ github.event.inputs.tag }}
+          docker push ${{ env.AZURE_ACR_LOGIN_SERVER }}/my-java-app:${{ github.event.inputs.tag }}
