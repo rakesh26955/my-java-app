@@ -15,6 +15,12 @@ on:
       - 'Dockerfile'        # Trigger if Dockerfile is changed
       - 'pom.xml'           # Trigger if pom.xml is changed
       - 'src/**'             # Trigger if any file under src/ is changed
+  workflow_dispatch:    # This enables manual triggering
+    inputs:
+      tag:
+        description: 'Tag for the image'  # Optional input
+        required: true
+        default: 'latest'
 
 jobs:
   build:
@@ -33,16 +39,16 @@ jobs:
       - name: Log in to Azure Container Registry
         uses: azure/docker-login@v1
         with:
-          login-server: ${{ secrets.ACR_NAME }}.azurecr.io  # ACR name from GitHub secrets
-          username: ${{ secrets.ACR_USERNAME }}  # ACR username from GitHub secrets
-          password: ${{ secrets.ACR_PASSWORD }}  # ACR password from GitHub secrets
+          login-server: ${{ secrets.ACR_NAME }}.azurecr.io
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
 
       # Step 4: Build the Docker image
       - name: Build the Docker image
         run: |
-          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/my-java-app:latest .
+          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/my-java-app:${{ github.event.inputs.tag }} .
 
       # Step 5: Push the Docker image to Azure Container Registry
       - name: Push the Docker image
         run: |
-          docker push ${{ secrets.ACR_NAME }}.azurecr.io/my-java-app:latest
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/my-java-app:${{ github.event.inputs.tag }}
