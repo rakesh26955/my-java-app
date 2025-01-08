@@ -1,9 +1,10 @@
-# Use the official OpenJDK 11 Alpine image as the base
-FROM openjdk:11-alpine
+# Use the official OpenJDK 11 slim image as the base
+FROM openjdk:11-jdk-slim
 
 # Install Maven
-RUN apk update && \
-    apk add maven
+RUN apt-get update && \
+    apt-get install -y maven && \
+    apt-get clean;
 
 # Set the working directory in the container
 WORKDIR /app
