@@ -3,46 +3,46 @@ name: Build and Push Docker Image
 on:
   push:
     branches:
-      - main
+      - main  # Trigger on push to main branch
     paths:
-      - 'pom.xml'
-      - 'Dockerfile'
-      - 'src/**'
+      - 'Dockerfile'        # Trigger if Dockerfile is changed
+      - 'pom.xml'           # Trigger if pom.xml is changed
+      - 'src/**'             # Trigger if any file under src/ is changed
   pull_request:
     branches:
-      - main
+      - main  # Trigger on pull request to main branch
     paths:
-      - 'pom.xml'
-      - 'Dockerfile'
-      - 'src/**'
+      - 'Dockerfile'        # Trigger if Dockerfile is changed
+      - 'pom.xml'           # Trigger if pom.xml is changed
+      - 'src/**'             # Trigger if any file under src/ is changed
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # The OS to run the job
 
     steps:
-      # Checkout the code
+      # Step 1: Checkout the code
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Set up Docker Buildx
+      # Step 2: Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # Log in to Azure Container Registry
+      # Step 3: Log in to Azure Container Registry
       - name: Log in to Azure Container Registry
         uses: azure/docker-login@v1
         with:
-          login-server: ${{ secrets.AZURE_ACR_LOGIN_SERVER }}  # usecasecr.azurecr.io
-          username: ${{ secrets.AZURE_ACR_USERNAME }}  # Your ACR username (service principal client ID)
-          password: ${{ secrets.AZURE_ACR_PASSWORD }}  # Your ACR password (service principal client secret)
+          login-server: ${{ secrets.ACR_NAME }}.azurecr.io  # ACR name from GitHub secrets
+          username: ${{ secrets.ACR_USERNAME }}  # ACR username from GitHub secrets
+          password: ${{ secrets.ACR_PASSWORD }}  # ACR password from GitHub secrets
 
-      # Build the Docker image
+      # Step 4: Build the Docker image
       - name: Build the Docker image
         run: |
-          docker build -t ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/my-java-app:latest .
+          docker build -t ${{ secrets.ACR_NAME }}.azurecr.io/my-java-app:latest .
 
-      # Push the Docker image to Azure Container Registry
+      # Step 5: Push the Docker image to Azure Container Registry
       - name: Push the Docker image
         run: |
-          docker push ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/my-java-app:latest
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/my-java-app:latest
