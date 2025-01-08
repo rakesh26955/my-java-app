@@ -50,12 +50,24 @@ jobs:
           username: ${{ env.AZURE_USERNAME }}  # ACR username from env variable
           password: ${{ env.AZURE_PASSWORD }}  # ACR password from env variable
 
-      # Step 5: Build the Docker image
+      # Step 5: Build the Docker image with a unique version tag based on commit SHA
       - name: Build the Docker image
         run: |
-          docker build -t ${{ env.AZURE_ACR_LOGIN_SERVER }}/my-java-app:${{ github.event.inputs.tag }} .
+          IMAGE_TAG=${{ github.sha }}  # Use commit SHA as the version tag
+          echo "Building image with tag $IMAGE_TAG"
+          docker build -t ${{ env.AZURE_ACR_LOGIN_SERVER }}/my-java-app:$IMAGE_TAG .
 
       # Step 6: Push the Docker image to Azure Container Registry
       - name: Push the Docker image
         run: |
-          docker push ${{ env.AZURE_ACR_LOGIN_SERVER }}/my-java-app:${{ github.event.inputs.tag }}
+          IMAGE_TAG=${{ github.sha }}  # Use commit SHA as the version tag
+          echo "Pushing image with tag $IMAGE_TAG"
+          docker push ${{ env.AZURE_ACR_LOGIN_SERVER }}/my-java-app:$IMAGE_TAG
+
+      # Step 7: Optionally, also tag the image as 'latest' for convenience (overwriting the previous 'latest' image)
+      - name: Tag and push image as latest
+        run: |
+          IMAGE_TAG=${{ github.sha }}
+          echo "Tagging image as 'latest'"
+          docker tag ${{ env.AZURE_ACR_LOGIN_SERVER }}/my-java-app:$IMAGE_TAG ${{ env.AZURE_ACR_LOGIN_SERVER }}/my-java-app:latest
+          docker push ${{ env.AZURE_ACR_LOGIN_SERVER }}/my-java-app:latest
