@@ -35,20 +35,27 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # Step 3: Log in to Azure Container Registry using secrets
+      # Step 3: Debug to verify secrets
+      - name: Debug - Verify Secrets
+        run: |
+          echo "ACR_LOGIN_SERVER: ${{ secrets.AZURE_ACR_LOGIN_SERVER }}"
+          echo "ACR_USERNAME: ${{ secrets.azure_username }}"
+          echo "ACR_PASSWORD: ${{ secrets.azure_password }}"
+
+      # Step 4: Log in to Azure Container Registry using secrets
       - name: Log in to Azure Container Registry
         uses: azure/docker-login@v1
         with:
-          login-server: ${{ secrets.AZURE_ACR_LOGIN_SERVER }}  # Use the ACR login server from secrets
-          username: ${{ secrets.azure_username }}  # Use ACR username from secrets
-          password: ${{ secrets.azure_password }}  # Use ACR password from secrets
+          login-server: ${{ secrets.AZURE_ACR_LOGIN_SERVER }}  # ACR login server from secret
+          username: ${{ secrets.azure_username }}  # ACR username from secret
+          password: ${{ secrets.azure_password }}  # ACR password from secret
 
-      # Step 4: Build the Docker image
+      # Step 5: Build the Docker image
       - name: Build the Docker image
         run: |
           docker build -t ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/my-java-app:${{ github.event.inputs.tag }} .
 
-      # Step 5: Push the Docker image to Azure Container Registry
+      # Step 6: Push the Docker image to Azure Container Registry
       - name: Push the Docker image
         run: |
           docker push ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/my-java-app:${{ github.event.inputs.tag }}
